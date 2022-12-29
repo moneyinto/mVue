@@ -1,0 +1,14 @@
+{
+  "name": "mvue",
+  "version": "1.0.0",
+  "description": "简单的vue实现",
+  "main": "mVue.js",
+  "scripts": {
+    "dev": "vite"
+  },
+  "author": "moneyinto",
+  "license": "ISC",
+  "devDependencies": {
+    "vite": "^4.0.3"
+  }
+}
