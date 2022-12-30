@@ -29,7 +29,7 @@ Compile.prototype = {
         var childNodes = el.childNodes;
         var self = this;
         [].slice.call(childNodes).forEach(function (node) {
-            var reg = /\{\{(.*)\}\}/;
+            var reg = /\{\{(.*?)\}\}/;
             var text = node.textContent;
             if (self.isElementNode(node)) {
                 self.compile(node);
@@ -69,9 +69,11 @@ Compile.prototype = {
     compileText: function (node, exp) {
         var self = this;
         var initText = this.vm[exp];
-        this.updateText(node, initText);
+        var textContent = node.textContent; // 存储初始文本
+        var reg = /\{\{(.*?)\}\}/;
+        this.updateText(node, textContent.replace(reg, initText));
         new Watcher(this.vm, exp, function (value) {
-            self.updateText(node, value);
+            self.updateText(node, textContent.replace(reg, value));
         });
     },
     compileEvent: function (node, vm, exp, dir) {
