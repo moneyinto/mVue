@@ -1,3 +1,7 @@
+
+function trim(val) {
+    return val.replace(/(^\s*)|(\s*$)/g, "");
+}
 function Compile(el, vm) {
     this.vm = vm;
     this.el = document.querySelector(el);
@@ -34,7 +38,7 @@ Compile.prototype = {
             if (self.isElementNode(node)) {
                 self.compile(node);
             } else if (self.isTextNode(node) && reg.test(text)) {
-                self.compileText(node, reg.exec(text)[1]);
+                self.compileText(node, trim(reg.exec(text)[1]));
             }
 
             if (node.childNodes && node.childNodes.length) {
@@ -71,9 +75,14 @@ Compile.prototype = {
         var initText = this.vm[exp];
         var textContent = node.textContent; // 存储初始文本
         var reg = /\{\{(.*?)\}\}/;
-        this.updateText(node, textContent.replace(reg, initText));
+        this.updateText(node, textContent.replace(reg, function (val, key) {
+            return self.vm[trim(key)];
+        }));
         new Watcher(this.vm, exp, function (value) {
-            self.updateText(node, textContent.replace(reg, value));
+            self.updateText(node, textContent.replace(reg, function (val, key) {
+                var newKey = trim(key);
+                return newKey === exp ? value : self.vm[newKey];
+            }));
         });
     },
     compileEvent: function (node, vm, exp, dir) {
@@ -110,7 +119,7 @@ Compile.prototype = {
         var self = this;
         new Watcher(this.vm, dataKey, function (value) {
             console.log("update", node)
-            cacheTags.forEach(function(tag, index) {
+            cacheTags.forEach(function (tag, index) {
                 // 保留第一个 为了更新替换
                 if (index > 0) tag.parentNode.removeChild(tag)
             });
@@ -171,7 +180,7 @@ Compile.prototype = {
         node.parentNode.replaceChild(fragment, node);
 
         var self = this;
-        cacheTags.forEach(function(tag) {
+        cacheTags.forEach(function (tag) {
             self.compileElement(tag);
         })
 
